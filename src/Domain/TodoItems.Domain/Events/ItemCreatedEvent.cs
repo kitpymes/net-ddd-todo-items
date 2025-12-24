@@ -1,6 +1,8 @@
-﻿namespace TodoItems.Domain.Events;
+﻿using MediatR;
 
-public sealed class ItemCreatedEvent(int itemId) : DomainEvent
+namespace TodoItems.Domain.Events;
+
+public class ItemCreatedEvent(int itemId) : DomainEvent, INotification
 {
     public int ItemId { get; } = itemId;
 }

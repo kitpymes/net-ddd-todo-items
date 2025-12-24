@@ -1,10 +1,7 @@
-using FluentAssertions;
 using Moq;
 using TodoItems.Application.UseCases;
 using TodoItems.Domain.Entities;
 using TodoItems.Domain.Interfaces;
-using Xunit;
-
 
 namespace TodoItems.Application.Tests;
 
@@ -14,6 +11,7 @@ public class AddItemUseCaseTests
     public void Execute_ShouldAddItem()
     {
         var repoMock = new Mock<IItemRepository>();
+
         var useCase = new AddItemUseCase(repoMock.Object);
 
         useCase.Execute(1, "Title", "Desc", "Cat");

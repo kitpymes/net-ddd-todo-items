@@ -9,5 +9,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\TodoItems.Domain\TodoItems.Domain.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Commands\UpdateItem\" />
+    <Folder Include="_Common\Behaviours\" />
+    <Folder Include="_Common\Events\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.0.0" />
+  </ItemGroup>
 
 </Project>
