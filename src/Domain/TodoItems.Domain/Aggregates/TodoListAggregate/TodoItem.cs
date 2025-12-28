@@ -35,14 +35,20 @@ public class TodoItem : EntityBaseInt
         Category = category;
     }
 
-    public void UpdateDescription(string description) => Description = description;
+    public void UpdateDescription(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+            throw new DomainValidationException("La descripción es obligatoria.");
+
+        Description = description;
+    }
 
     public void AddProgression(Progression progression) => _progressions.Add(progression);
 
     public decimal TotalProgress => _progressions.Sum(p => p.Percent);
 
-    public bool IsCompleted => _progressions.Any() && _progressions.Max(p => p.Percent) >= 100;
+    public bool IsCompleted => _progressions.Any() && _progressions.Sum(p => p.Percent) >= 100;
 
     public string ToFullString()
-        => $"{Id}) {Title} - {Description} ({Category.Name}) Completed:{IsCompleted})";
+        => $"{Id}) {Title} - {Description} ({Category.Name}) Completed:{IsCompleted}";
 }

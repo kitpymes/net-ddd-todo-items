@@ -5,9 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Results;
 using System.Reflection;
-using TodoItems.Infrastructure.Exceptions;
+using TodoItems.Application._Common.Exceptions;
 
-namespace TodoItems.Infrastructure.Extensions;
+namespace TodoItems.Application._Common.Extensions;
 
 public static partial class ServiceCollectionExtensions
 {

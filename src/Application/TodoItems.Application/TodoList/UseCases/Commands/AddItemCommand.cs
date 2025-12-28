@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TodoItems.Application._Common.Exceptions;
 using TodoItems.Domain._Common.AppResults;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
@@ -16,12 +17,12 @@ public class AddItemCommandHandler(ITodoListRepository repository) : IRequestHan
         var todoList = await _repository.GetTodoListByIdAsync(request.TodoListId, cancellationToken);
 
         if (todoList is null)
-            return AppResult.BadRequest($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
+            throw new AppValidationsException($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
 
         var categories = await _repository.GetAllCategoriesAsync(cancellationToken);
 
         if (!categories.Contains(request.Category))
-            return AppResult.BadRequest($"La categoría '{request.Category}' no existe. Categorías disponibles: {string.Join(", ", categories)}");
+            throw new AppValidationsException($"La categoría '{request.Category}' no existe. Categorías disponibles: {string.Join(", ", categories)}");
 
         int newItemId = await _repository.GetNextItemIdAsync();
 
@@ -31,6 +32,6 @@ public class AddItemCommandHandler(ITodoListRepository repository) : IRequestHan
 
         await _repository.SaveAsync(todoList, cancellationToken);
 
-        return AppResult.Success(newItemId);
+        return AppResult.Success(x => x.WithData(newItemId));
     }
 }

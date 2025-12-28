@@ -4,7 +4,7 @@ namespace TodoItems.Domain._Common.AppResults._Settings;
 
 public class ResultOptionsError
 {
-    public ResultSettingsError ResultSettings { get; private set; } = new ResultSettingsError();
+    public ResultSettingsError ResultSettings { get; private set; } = new();
 
     public ResultOptionsError WithTitle(string title)
     {

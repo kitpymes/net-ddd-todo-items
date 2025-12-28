@@ -9,10 +9,11 @@
     }
   },
     "profiles": {
-        "[DEV]": {
+        "[DEV | CONSOLE]": {
             "commandName": "Project",
             "launchBrowser": false,
             "dotnetRunMessages": true,
+            "commandLineArgs": "--console",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },

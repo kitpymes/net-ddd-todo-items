@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using TodoItems.Application._Common.Exceptions;
 using TodoItems.Application.TodoList.DTOs;
 using TodoItems.Domain._Common.AppResults;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
@@ -18,19 +19,11 @@ public class GetItemsByTodoListIdQueryHandler(ITodoListRepository repository, IM
     {
         var items = await _repository.GetAllItemsAsync(request.TodoListId, cancellationToken);
 
-        //  var dtos = _mapper.Map<IReadOnlyCollection<TodoItemReportDto>>(items);
+        if(items?.Count == 0)
+            throw new AppValidationsException($"No se encontraron ítems para la lista de tareas con Id {request.TodoListId}.");
 
-        var dtos = items
-            .Select(i => new TodoItemReportDto(
-                i.Id,
-                i.Title,
-                i.Description,
-                i.Category.Name,
-                [.. i.Progressions
-                    .OrderByDescending(p => p.Date)
-                    .Select(p => new ProgressionDto(p.Date, p.Percent))]
-            ));
+        var dtos = _mapper.Map<IReadOnlyCollection<TodoItemReportDto>>(items);
 
-        return AppResult.Success(dtos);      
+        return AppResult.Success(x => x.WithData(dtos));      
     }
 }

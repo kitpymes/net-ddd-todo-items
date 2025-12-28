@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TodoItems.Application._Common.Exceptions;
 using TodoItems.Domain._Common.AppResults;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
 
@@ -15,7 +16,7 @@ public class UpdateItemCommandHandler(ITodoListRepository repository) : IRequest
         var todoList = await _repository.GetTodoListByIdAsync(request.TodoListId, cancellationToken);
 
         if (todoList is null)
-            return AppResult.BadRequest($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
+            throw new AppValidationsException($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
 
         todoList.UpdateItem(request.ItemId, request.Description);
 

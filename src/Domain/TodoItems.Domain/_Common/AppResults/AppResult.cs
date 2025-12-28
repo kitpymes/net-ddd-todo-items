@@ -27,32 +27,43 @@ public class AppResult : IAppResult
 
     public IDictionary<string, IEnumerable<string>>? Errors { get; private set; }
 
-    public static IAppResult Success() => new AppResult(true);
+    public static AppResult Success() => new(true);
 
-    public static IAppResult Success<TValue>(TValue value) => new AppResult(true)
+    public static AppResult Success(Action<ResultOptionsSuccess> options)
     {
-        Data = value
-    };
+        var settings = new ResultOptionsSuccess();
 
-    public static IAppResult BadRequest(string message)
+        options.Invoke(settings);
+
+        var config = settings.ResultSettings;
+
+        return new AppResult(true)
+        {
+            Status = (int)HttpStatusCode.OK,
+            Title = config.Title,
+            Data = config.Data,
+        };
+    }
+
+    public static AppResult BadRequest(string message)
     => Error(x => x
         .WithMessage(message)
         .WithStatusCode(HttpStatusCode.BadRequest)
         .WithTitle("Validation Error"));
 
-    public static IAppResult BadRequest(IEnumerable<string> messages)
+    public static AppResult BadRequest(IEnumerable<string> messages)
         => Error(x => x
             .WithMessages(messages)
             .WithStatusCode(HttpStatusCode.BadRequest)
             .WithTitle("Validation Error"));
 
-    public static IAppResult BadRequest(IEnumerable<(string fieldName, string message)> errors)
+    public static AppResult BadRequest(IEnumerable<(string fieldName, string message)> errors)
         => Error(x => x
             .WithErrors(errors)
             .WithStatusCode(HttpStatusCode.BadRequest)
             .WithTitle("Validation Error"));
 
-    public static IAppResult Error(Action<ResultOptionsError> options)
+    public static AppResult Error(Action<ResultOptionsError> options)
     {
         var settings = new ResultOptionsError();
 

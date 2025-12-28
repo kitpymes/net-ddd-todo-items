@@ -16,6 +16,6 @@ public class GetTodoListQueryHandler(ITodoListRepository repository, IMapper map
     {
         var items = await _repository.GetAllTodoListAsync(cancellationToken);
 
-        return AppResult.Success(items);
+        return AppResult.Success(x => x.WithData(items));
     }
 }

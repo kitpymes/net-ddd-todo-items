@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System.Net;
+using TodoItems.Application._Common.Exceptions;
 using TodoItems.Domain._Common.AppResults;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
 
@@ -16,7 +17,7 @@ public class RegisterProgressItemCommandHandler(ITodoListRepository repository) 
         var todoList = await _repository.GetTodoListByIdAsync(request.TodoListId, cancellationToken);
 
         if (todoList is null)
-            return AppResult.BadRequest($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
+            throw new AppValidationsException($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
 
         var registrationDate = request.Date ?? DateTime.UtcNow;
 

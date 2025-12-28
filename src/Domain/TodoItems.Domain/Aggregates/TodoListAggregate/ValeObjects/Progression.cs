@@ -38,13 +38,15 @@ public sealed class Progression : IEquatable<Progression>
 
     public override string ToString() => $"{Date:O} - {Percent.ToString("P", CultureInfo.InvariantCulture)}";
 
-    public string ToFullString() 
+    public string ToFullString(decimal percentSum) 
     {
         var progressBarLength = 50;
-        var filledLength = (int)(Percent / 100 * progressBarLength);
+        var filledLength = (int)(percentSum / 100 * progressBarLength);
         var emptyLength = progressBarLength - filledLength;
         var progressBar = "|" + new string('O', filledLength) + new string(' ', emptyLength) + "|";
 
-        return $"  {Date:MM/dd/yyyy} - {Percent,3}% {progressBar}";
+        var culture = CultureInfo.GetCultureInfo("es-ES");
+
+        return $"  {Date.ToString("dd/MM/yyyy hh:mm:ss tt", CultureInfo.InvariantCulture)} - {string.Format(culture, "{0,6:N2}", percentSum)}% {progressBar}";
     }
 }

@@ -1,81 +1,49 @@
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using TodoItems.Application.TodoList.Mappings;
-using TodoItems.Application.TodoList.UseCases.Commands;
-using TodoItems.Application.TodoList.UseCases.Queries;
-using TodoItems.Domain.Aggregates.TodoListAggregate;
+using TodoItems.Application;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
-using TodoItems.Infrastructure.Extensions;
-using TodoItems.Infrastructure.Middlewares;
-using TodoItems.Infrastructure.Persistence;
-using TodoItems.Infrastructure.Persistence.Repositories;
+using TodoItems.Infrastructure;
+using TodoItems.Domain;
+using TodoItems.Presentation.API;
+using TodoItems.Presentation.API.Extensions;
+using TodoItems.Presentation.API.Middlewares;
 
-var builder = WebApplication.CreateBuilder(args); 
+var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(); 
+builder.Services.LoadPresentation();
 
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.LoadApplication();
 
-builder.Services.AddRouting(options =>
+builder.Services.LoadDomain();
+
+builder.Services.LoadPersistence();
+
+bool isConsole = args.Contains("--console");
+
+if (isConsole)
 {
-    options.LowercaseUrls = true; 
-    options.LowercaseQueryStrings = true;
-});
+    var repository = builder.Services.BuildServiceProvider().GetRequiredService<ITodoListRepository>();
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-    options.SerializerOptions.PropertyNameCaseInsensitive = true;
-});
+    var todoList = await repository.GetAllTodoListAsync(CancellationToken.None);
 
-builder.Services.AddSwaggerGen();
+    foreach (var list in todoList)
+    {
+        list.PrintItems();
+    }
 
-builder.Services.AddAutoMapper(typeof(ItemMapping).Assembly);
-
-builder.Services.AddFluentValidation(typeof(AddItemCommandValidator).Assembly);
-
-builder.Services.AddMediatR(config => {
-    config.RegisterServicesFromAssembly(typeof(AddItemCommandHandler).Assembly);
-    //config.AddOpenBehavior(typeof(ValidationBehavior<,>));
-});
-
-builder.Services.AddScoped<ITodoListRepository, TodoListRepository>();
-builder.Services.AddScoped<ITodoList, TodoList>();
-
-var connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
-connection.Open();
-
-builder.Services.AddDbContext<TodoListDbContext>(options =>
-    options.UseSqlite(connection)
-    .LogTo(Console.WriteLine, LogLevel.Information));
-
-//builder.Services.AddDbContext<TodoListDbContext>(options => options.UseInMemoryDatabase("ItemsDb"));
+    return;
+}
 
 var app = builder.Build(); 
-if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
-app.UseMiddleware<AppValidationsMiddleware>();
-app.MapControllers();
 
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<TodoListDbContext>();
-
-        await context.Database.EnsureCreatedAsync();
-
-        await TodoDataSeeder.SeedAsync(context);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al agregar datos en la base de datos.");
-    }
+if (app.Environment.IsDevelopment()) 
+{ 
+    app.LoadSwagger();
 }
+
+app.UseMiddleware<AppValidationsMiddleware>();
+
+app.MapControllers();
 
 app.Run();
 
 public partial class Program { }
+

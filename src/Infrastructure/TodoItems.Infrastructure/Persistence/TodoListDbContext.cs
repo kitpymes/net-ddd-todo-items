@@ -19,6 +19,15 @@ public class TodoListDbContext(DbContextOptions<TodoListDbContext> options, ISer
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TodoListDbContext).Assembly);
     }
 
+    public override int SaveChanges()
+    {
+        var result = base.SaveChanges();
+
+        _mediator.DispatchDomainEvents(this);
+
+        return result;
+    }
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = await base.SaveChangesAsync(cancellationToken);

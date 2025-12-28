@@ -57,29 +57,29 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
         _logger.LogInformation($"Descripción del ítem {id} actualizada.");
     }
 
-    public void RemoveItem(int id)
+    public void RemoveItem(int itemId)
     {
-        var item = _items.FirstOrDefault(x => x.Id == id);
+        var item = _items.FirstOrDefault(x => x.Id == itemId);
 
         if (item is null)
-            throw new DomainValidationException($"No se puede eliminar porque no se encontró el ítem con ID {id}.");
+            throw new DomainValidationException($"No se puede eliminar porque no se encontró el ítem con ID {itemId}.");
 
         //REQUERIDO: No se permitirá actualizar ni borrar un TodoItem que tenga más del 50% realizado.        
        if (item.TotalProgress > 50)
             throw new DomainValidationException("No se puede eliminar el ítem porque tiene más del 50% realizado.");
 
         if (!_items.Remove(item))
-            throw new DomainValidationException($"No se puede eliminar el ítem con ID {id}.");
+            throw new DomainValidationException($"No se puede eliminar el ítem con ID {itemId}.");
 
-        _logger.LogInformation($"Ítem {id} eliminado.");
+        _logger.LogInformation($"Ítem {itemId} eliminado.");
     }
 
-    public void RegisterProgression(int id, DateTime dateTime, decimal percent)
+    public void RegisterProgression(int itemId, DateTime dateTime, decimal percent)
     {
-        var item = _items.FirstOrDefault(x => x.Id == id);
+        var item = _items.FirstOrDefault(x => x.Id == itemId);
 
         if (item is null)
-            throw new DomainValidationException($"No se puede registrar el progreso porque no se encontró el ítem con ID {id}.");
+            throw new DomainValidationException($"No se puede registrar el progreso porque no se encontró el ítem con ID {itemId}.");
 
         // REQUERIDO: se validará que la fecha de la nueva Progression sea mayor a las progresiones que ya tenga guardadas.
         if (item.Progressions.Any(x => x.Date >= dateTime))
@@ -96,7 +96,7 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
 
         item.AddProgression(new Progression(dateTime, percent));
 
-        _logger.LogInformation($"Progreso de {percent}% registrado para el ítem {id}.");
+        _logger.LogInformation($"Progreso de {percent}% registrado para el ítem {itemId}.");
     }
 
 
@@ -113,6 +113,8 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
 
         foreach (var item in _items.OrderBy(x => x.Id))
         {
+            Console.WriteLine();
+
             Console.WriteLine(item.ToFullString());
 
             /*  REQUERIDO: 
@@ -128,13 +130,17 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
              */
             if (item.Progressions.Count > 0)
             {
+                var percentSum = 0m;
+
                 foreach (var progression in item.Progressions.OrderBy(x => x.Date))
                 {
-                    Console.WriteLine(progression.ToFullString());
+                    percentSum += progression.Percent;
+
+                    Console.WriteLine(progression.ToFullString(percentSum));
                 }
             }
         }
 
-        Console.WriteLine("-------------------------\n");
+        Console.WriteLine("\n-------------------------\n");
     }
 }

@@ -16,6 +16,6 @@ public class GetCategoriesQueryHandler(ITodoListRepository repository, IMapper m
     {
         var items = await _repository.GetAllCategoriesAsync(cancellationToken);
 
-        return AppResult.Success(items);
+        return AppResult.Success(x => x.WithData(items));
     }
 }

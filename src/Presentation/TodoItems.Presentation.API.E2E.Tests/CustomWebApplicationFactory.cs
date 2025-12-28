@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using TodoItems.Infrastructure.Persistence;
@@ -13,21 +15,23 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<TodoListDbContext>));
+            //services.LoadPresentation();
 
-            if (descriptor != null)
-                services.Remove(descriptor);
+            var dbContextConfigDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextOptionsConfiguration<TodoListDbContext>));
+            if (dbContextConfigDescriptor != null) services.Remove(dbContextConfigDescriptor);
 
-            services.AddDbContext<TodoListDbContext>(options =>
-                options.UseInMemoryDatabase("E2E_DB"));
+            var connectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(System.Data.Common.DbConnection));
+            if (connectionDescriptor != null) services.Remove(connectionDescriptor);
 
-            services.ConfigureHttpJsonOptions(options =>
-            {
-                options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.SerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
-                options.SerializerOptions.PropertyNameCaseInsensitive = true;
-            });
+            services.AddDbContext<TodoListDbContext>(options => options.UseInMemoryDatabase("E2E_DB"));            
+
+            var appService = services.BuildServiceProvider();
+
+            var context = appService.GetRequiredService<TodoListDbContext>();
+
+            context.Database.EnsureCreated();
+
+            TodoListDataSeeder.Seed(context);           
         });
     }
 }

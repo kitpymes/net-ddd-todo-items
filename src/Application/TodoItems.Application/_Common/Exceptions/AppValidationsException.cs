@@ -1,6 +1,5 @@
-﻿namespace TodoItems.Infrastructure.Exceptions;
+﻿namespace TodoItems.Application._Common.Exceptions;
 
-[Serializable]
 public class AppValidationsException : Exception
 {
     public AppValidationsException(params string[] messages)

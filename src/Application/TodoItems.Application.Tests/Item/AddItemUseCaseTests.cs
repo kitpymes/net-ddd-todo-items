@@ -28,11 +28,7 @@ public class AddItemUseCaseTests
 
         repoMock.Setup(r => r.GetNextItemIdAsync()).ReturnsAsync(itemId); 
 
-        todoListMock
-            .Setup(m => m. AddItem(itemId, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Category>()))
-            .Verifiable();
-
-        var useCase = new AddItemCommandHandler(todoListMock.Object, repoMock.Object, mapperMock.Object);
+        var useCase = new AddItemCommandHandler(repoMock.Object);
 
         // Act
         await useCase.Handle(request, CancellationToken.None);

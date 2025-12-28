@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.Net;
+﻿using System.Net;
+using TodoItems.Application._Common.Exceptions;
 using TodoItems.Domain._Common.AppResults;
 using TodoItems.Domain._Common.Exceptions;
-using TodoItems.Infrastructure.Exceptions;
 using TodoItems.Infrastructure.Extensions;
 
-namespace TodoItems.Infrastructure.Middlewares;
+namespace TodoItems.Presentation.API.Middlewares;
 
 public class AppValidationsMiddleware(RequestDelegate requestDelegate)
 {
@@ -31,9 +28,9 @@ public class AppValidationsMiddleware(RequestDelegate requestDelegate)
 
         ILogger logger = loggerFactory.CreateLogger<AppValidationsMiddleware>();
 
-        var isDevelopment = httpContext.RequestServices.GetService<Microsoft.Extensions.Hosting.IHostEnvironment>()?.EnvironmentName == "Development";
+        var isDevelopment = httpContext.RequestServices.GetService<IHostEnvironment>()?.EnvironmentName == "Development";
 
-        IAppResultError? result = null;
+        AppResult? result = null;
 
         var exceptionTypeName = exception.GetType().Name;
 
@@ -55,6 +52,7 @@ public class AppValidationsMiddleware(RequestDelegate requestDelegate)
                 });
 
                 logger.LogError(exception, "{StatusCode}", statusCode);
+
                 break;
 
             case AppValidationsException validationException when exception is AppValidationsException:
