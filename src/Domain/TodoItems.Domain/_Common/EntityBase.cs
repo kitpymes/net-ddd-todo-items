@@ -1,6 +1,5 @@
 ﻿
 using System.Diagnostics.CodeAnalysis;
-using MediatR;
 
 namespace TodoItems.Domain._Common;
 
