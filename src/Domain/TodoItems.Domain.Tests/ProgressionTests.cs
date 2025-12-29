@@ -10,7 +10,7 @@ public class ProgressionTests
     [Fact]
     public void Constructor_Should_SetProperties()
     {
-        var date = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+        var date = DateTime.Now;
         var progression = new Progression(date, 42.5m);
 
         progression.Date.Should().Be(date);
@@ -32,7 +32,7 @@ public class ProgressionTests
     [Fact]
     public void Equals_Should_BeTrue_ForSameValues()
     {
-        var date = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var date = DateTime.Now;
         var a = new Progression(date, 50m);
         var b = new Progression(date, 50m);
 
@@ -45,7 +45,7 @@ public class ProgressionTests
     [Fact]
     public void ToString_Should_Return_O_Format_WithPercent()
     {
-        var date = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+        var date = DateTime.Now;
         var percent = 12.34m;
         var progression = new Progression(date, 12.34m);
 

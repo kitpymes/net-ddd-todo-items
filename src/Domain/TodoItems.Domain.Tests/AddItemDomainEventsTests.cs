@@ -5,16 +5,14 @@ using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 
 namespace TodoItems.Domain.Tests;
 
-public class ItemDomainEventsTests
+public class AddItemDomainEventsTests
 {
     [Fact]
     public void CreatingItem_ShouldRaise_ItemCreatedEvent()
     {
-        var itemId = 1;
-        var category = new Category("Cat");
+        var todoList = new TodoList();
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), new Category(Guid.NewGuid().ToString()));
 
-        var item = new TodoItem(itemId, "Title", "Desc", category);
-
-      //  item.DomainEvents.Should().ContainSingle(e => e is TodoItemCreatedEvent);
+        todoList.DomainEvents.Should().ContainSingle(e => e is TodoItemCreatedEvent);
     }
 }

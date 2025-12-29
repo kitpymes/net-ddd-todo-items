@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 using TodoItems.Infrastructure.Persistence;
 
 namespace TodoItems.Presentation.API.E2E.Tests;
@@ -15,8 +13,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            //services.LoadPresentation();
-
             var dbContextConfigDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IDbContextOptionsConfiguration<TodoListDbContext>));
             if (dbContextConfigDescriptor != null) services.Remove(dbContextConfigDescriptor);
 

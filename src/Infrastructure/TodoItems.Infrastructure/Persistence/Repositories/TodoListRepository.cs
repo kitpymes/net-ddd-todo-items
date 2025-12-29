@@ -1,7 +1,4 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
-using TodoItems.Application.TodoList.DTOs;
+﻿using Microsoft.EntityFrameworkCore;
 using TodoItems.Domain.Aggregates.TodoListAggregate;
 using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
 
@@ -23,6 +20,7 @@ public class TodoListRepository(TodoListDbContext context) : ITodoListRepository
     public async Task<IReadOnlyCollection<TodoList>> GetAllTodoListAsync(CancellationToken cancellationToken)
         => await _context.TodoLists
             .Include(x => x.Items)
+                .ThenInclude(i => i.Progressions)
             .OrderBy(x => x.Id)
             .ToListAsync(cancellationToken);
 
@@ -36,6 +34,7 @@ public class TodoListRepository(TodoListDbContext context) : ITodoListRepository
     => await _context.TodoLists
         .Where(l => l.Id == todoListId)
         .SelectMany(l => l.Items)
+            .Include(i => i.Progressions)
         .OrderBy(i => i.Id)
         .ToListAsync(cancellationToken);
 
@@ -48,57 +47,4 @@ public class TodoListRepository(TodoListDbContext context) : ITodoListRepository
 
         await _context.SaveChangesAsync(cancellationToken);
     }
-
-
-
-            
-
-    public Task AddAsync(TodoItem item, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task UpdateAsync(TodoItem item, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task RemoveAsync(TodoItem item, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IReadOnlyCollection<TodoItem>> GetAllAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    //public async Task<IReadOnlyCollection<TodoItem>> GetAllAsync(CancellationToken cancellationToken)
-    //    => await _context.Items.ToListAsync(cancellationToken);
-
-    //public async Task<TodoItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
-    //    => await _context.Items
-    //        .Include(i => i.Progressions)
-    //        .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
-
-    //public async Task AddAsync(TodoItem item, CancellationToken cancellationToken)
-    //{
-    //    await _context.Items.AddAsync(item, cancellationToken);
-
-    //    await _context.SaveChangesAsync(cancellationToken);
-    //}
-
-    //public async Task UpdateAsync(TodoItem item, CancellationToken cancellationToken)
-    //{
-    //    _context.Items.Update(item);
-
-    //    await _context.SaveChangesAsync(cancellationToken);
-    //}
-
-    //public async Task RemoveAsync(TodoItem item, CancellationToken cancellationToken)
-    //{
-    //    _context.Items.Remove(item);
-
-    //    await _context.SaveChangesAsync(cancellationToken);
-    //}
 }

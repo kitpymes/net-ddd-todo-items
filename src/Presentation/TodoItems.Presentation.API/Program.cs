@@ -8,6 +8,8 @@ using TodoItems.Presentation.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddFilter("LuckyPennySoftware.MediatR.License", LogLevel.None);
+
 builder.Services.LoadPresentation();
 
 builder.Services.LoadApplication();

@@ -1,5 +1,7 @@
 ﻿
+using System.Globalization;
 using TodoItems.Domain._Common.Exceptions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 
@@ -17,7 +19,21 @@ public class Category : IEquatable<Category>
         Name = name;
     }
 
-    public bool Equals(Category? other) => other != null && Name == other.Name;
+    public override string ToString() => Name;
+
+    public bool Equals(Category? other)
+    {
+        if (ReferenceEquals(this, other)) return true;
+        if (other is null) return false;
+        return Name == other.Name;
+    }
+
     public override bool Equals(object? obj) => Equals(obj as Category);
+
     public override int GetHashCode() => Name.GetHashCode();
+
+    public static bool operator ==(Category? left, Category? right) =>
+        ReferenceEquals(left, right) || left is not null && left.Equals(right);
+
+    public static bool operator !=(Category? left, Category? right) => !(left == right);
 }

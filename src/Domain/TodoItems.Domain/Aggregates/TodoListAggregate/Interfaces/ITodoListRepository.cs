@@ -23,15 +23,4 @@ public interface ITodoListRepository
     Task<IReadOnlyCollection<TodoItem>> GetAllItemsAsync(Guid todoListId, CancellationToken cancellationToken);
     
     Task SaveAsync(TodoList todoList, CancellationToken cancellationToken);
-
-
-
-
-    Task<IReadOnlyCollection<TodoItem>> GetAllAsync(CancellationToken cancellationToken);
-
-    Task AddAsync(TodoItem item, CancellationToken cancellationToken);
-
-    Task UpdateAsync(TodoItem item, CancellationToken cancellationToken);
-
-    Task RemoveAsync(TodoItem item, CancellationToken cancellationToken);
 }

@@ -1,5 +1,4 @@
 ﻿using TodoItems.Domain._Common;
-using TodoItems.Domain._Common.Events;
 using TodoItems.Domain._Common.Exceptions;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 
@@ -24,14 +23,9 @@ public class TodoItem : EntityBaseInt
         if (string.IsNullOrWhiteSpace(title))
             throw new DomainValidationException("El título es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(description))
-            throw new DomainValidationException("La descripción es obligatoria.");
-
-        if (category is null)
-            throw new DomainValidationException("La categoria es obligatoria.");
+        UpdateDescription(description);
 
         Title = title;
-        Description = description;
         Category = category;
     }
 
