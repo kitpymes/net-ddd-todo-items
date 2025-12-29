@@ -46,17 +46,18 @@ El proyecto utiliza **GitHub Actions** para garantizar la calidad del código me
 
 ## 🛠️ Stack Tecnológico
 
-**.NET 8:**	Framework de ejecución.
-**MediatR:** Implementación de CQRS y mediación de eventos.
-**EF Core + SQLite:** ORM y base de datos relacional ligera y portátil.
-**FluentValidation:** Validación de lógica de entrada en la capa de aplicación.
-**GitHub Actions:**Automatización de Build y Testing (CI).
-**AutoMapper:** Mapeo de objetos entre capas.
-**Swagger / OpenAPI:** Documentación y exploración de la API.
-**xUnit + FluentAssertions:** Framework de pruebas y aserciones de lenguaje natural.
+*   **.NET 8:**	Framework de ejecución.
+*   **MediatR:** Implementación de CQRS y mediación de eventos.
+*   **EF Core + SQLite:** ORM y base de datos relacional ligera y portátil.
+*   **FluentValidation:** Validación de lógica de entrada en la capa de aplicación.
+*   **GitHub Actions:**Automatización de Build y Testing (CI).
+*   **AutoMapper:** Mapeo de objetos entre capas.
+*   **Swagger / OpenAPI:** Documentación y exploración de la API.
+*   **xUnit + FluentAssertions:** Framework de pruebas y aserciones de lenguaje natural.
 
 ## 📂 Estructura de Carpetas
 
+```text
 ├── 1-Presentacion
 │   ├── TodoItems.Presentation.API
 │   └── TodoItems.Presentation.API.E2E.Tests
@@ -69,6 +70,7 @@ El proyecto utiliza **GitHub Actions** para garantizar la calidad del código me
 └── 4-Infrastructure
     ├── TodoItems.Infrastructure
     └── TodoItems.Infrastructure.IntegrationTests
+```
 
 
 ## 🛡️ Reglas de Negocio (Invariantes del Dominio)
