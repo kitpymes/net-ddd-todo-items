@@ -1,6 +1,4 @@
-﻿# TodoItems DDD 🚀
-
-[![TodoItems .NET CI](https://github.com/kitpymes/net-ddd-todo-items/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kitpymes/net-ddd-todo-items/actions/workflows/dotnet.yml)
+﻿# TodoItems DDD 🚀 [![TodoItems .NET CI](https://github.com/kitpymes/net-ddd-todo-items/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kitpymes/net-ddd-todo-items/actions/workflows/dotnet.yml)
 
 Este proyecto es una implementación de referencia de una arquitectura **Domain-Driven Design (DDD)** robusta y moderna. El sistema está diseñado para gestionar listas de tareas complejas, aplicando un dominio enriquecido, patrones de persistencia avanzados y una estrategia de pruebas multinivel.
 
