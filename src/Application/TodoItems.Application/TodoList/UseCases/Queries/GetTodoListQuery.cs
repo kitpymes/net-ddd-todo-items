@@ -7,11 +7,9 @@ namespace TodoItems.Application.TodoList.UseCases.Queries;
 
 public record GetTodoListQuery() : IRequest<IAppResult>;
 
-public class GetTodoListQueryHandler(ITodoListRepository repository, IMapper mapper) : IRequestHandler<GetTodoListQuery, IAppResult>
+public class GetTodoListQueryHandler(ITodoListRepository repository) : IRequestHandler<GetTodoListQuery, IAppResult>
 {
     private readonly ITodoListRepository _repository = repository;
-    private readonly IMapper _mapper = mapper;
-
     public async Task<IAppResult> Handle(GetTodoListQuery request, CancellationToken cancellationToken)
     {
         var items = await _repository.GetAllTodoListAsync(cancellationToken);

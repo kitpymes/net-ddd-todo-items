@@ -9,6 +9,19 @@ public static class DependencyInjection
 {
     public static IServiceCollection LoadPresentation(this IServiceCollection services)
     {
+        var myAllowSpecificOrigins = "_TodoItemsAngular";
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy(name: myAllowSpecificOrigins,
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200") // URL de tu Angular
+                          .AllowAnyHeader()                   // Permite Content-Type, Authorization, etc.
+                          .AllowAnyMethod();                  // Permite GET, POST, PUT, DELETE
+                });
+        });
+
         services.AddControllers(options =>
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new KebabCaseParameterTransformer()));

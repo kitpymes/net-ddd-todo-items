@@ -43,6 +43,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<AppValidationsMiddleware>();
 
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+var myAllowSpecificOrigins = "_TodoItemsAngular";
+
+app.UseCors(myAllowSpecificOrigins);
+
 app.MapControllers();
 
 app.Run();
