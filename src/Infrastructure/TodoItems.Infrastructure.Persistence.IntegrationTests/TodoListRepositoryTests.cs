@@ -4,6 +4,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using TodoItems.Domain.Aggregates.TodoListAggregate;
+using TodoItems.Domain.Aggregates.TodoListAggregate.Entities;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 using TodoItems.Infrastructure.Persistence;
 
@@ -36,13 +37,13 @@ public class TodoListRepositoryTests : IDisposable
     public async Task Save_ShouldPersistTodoListWithItemsAndProgressions()
     {
         // ARRANGE: Creamos un agregado completo con datos complejos
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var itemId = 101;
         var date = new DateTime(2025, 12, 29); // Fecha de hoy en 2025
 
-        todoList.AddItem(itemId, "Tarea Infra", "Probar persistencia", new Category("Cat"));
-        todoList.RegisterProgression(itemId, date, 25);
-        todoList.RegisterProgression(itemId, date.AddHours(1), 30);
+        todoList.AddItem(itemId, "Tarea Infra", new Category("Cat"), "Probar persistencia");
+        todoList.RegisterItemProgression(itemId, date, 25);
+        todoList.RegisterItemProgression(itemId, date.AddHours(1), 30);
 
         // ACT: Guardamos en la base de datos
         _context.TodoLists.Add(todoList);
@@ -72,15 +73,15 @@ public class TodoListRepositoryTests : IDisposable
     public async Task Update_ShouldPersistChangesInPrivateCollection()
     {
         // ARRANGE: Partimos de un estado guardado
-        var todoList = new TodoList();
-        todoList.AddItem(1, "Original", "Desc", new Category("Cat"));
+        var todoList = new TodoList(Guid.NewGuid().ToString());
+        todoList.AddItem(1, "Original", new Category("Cat"), "Desc");
         _context.TodoLists.Add(todoList);
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
 
         // ACT: Cargamos, modificamos usando lógica de dominio y volvemos a guardar
         var listToUpdate = await _context.TodoLists.Include(x => x.Items).FirstAsync();
-        listToUpdate.UpdateItem(1, "Nueva Descripción 2025");
+        listToUpdate.UpdateItemDescription(1, "Nueva Descripción 2025");
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
 
@@ -93,8 +94,8 @@ public class TodoListRepositoryTests : IDisposable
     public async Task Delete_ShouldRemoveAggregateAndItsChildren()
     {
         // ARRANGE
-        var todoList = new TodoList();
-        todoList.AddItem(1, "A borrar", "D", new Category("Cat"));
+        var todoList = new TodoList(Guid.NewGuid().ToString());
+        todoList.AddItem(1, "A borrar", new Category("Cat"), "D");
         _context.TodoLists.Add(todoList);
         await _context.SaveChangesAsync();
 

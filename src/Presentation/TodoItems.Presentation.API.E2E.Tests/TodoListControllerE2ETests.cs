@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
-using TodoItems.Application.TodoList.DTOs;
+using TodoItems.Application.UseCases.TodoListUseCases._Common.DTOs;
 using TodoItems.Domain.Aggregates.TodoListAggregate;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 using TodoItems.Infrastructure.Persistence;
@@ -62,12 +62,12 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
 
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
 
         context.TodoLists.Add(todoList);
 
@@ -77,7 +77,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
 
         // Act
         var response = await _client.GetAsync(requestUri);
-        var result = await response.Content.ToAppResult<List<TodoItemReportDto>>();
+        var result = await response.Content.ToAppResult<List<TodoItemDto>>();
         response.EnsureSuccessStatusCode();
 
         // Assert
@@ -98,7 +98,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
 
         // Act
         var response = await _client.GetAsync(requestUri);
-        var result = await response.Content.ToAppResult<List<TodoItemReportDto>>();
+        var result = await response.Content.ToAppResult<List<TodoItemDto>>();
 
         // Assert
         Assert.NotNull(response);
@@ -110,21 +110,21 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
 
     #endregion GetItem
 
-    #region AddItem
+    #region CreateItem
 
     [Fact]
-    public async Task AddItem_ShouldCreateItem()
+    public async Task CreateItem_ShouldCreateItem()
     {
         // Arrange
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
 
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
 
         context.TodoLists.Add(todoList);
 
@@ -133,8 +133,8 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         var payload = new
         {
             Title = Guid.NewGuid().ToString(),
-            Description = Guid.NewGuid().ToString(),
-            Category = category.Name
+            Category = category.Name,
+            Description = Guid.NewGuid().ToString()
         };
 
         var requestUri = $"api/v1/todo-list/{todoList.Id}/item";
@@ -154,7 +154,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
     }
 
     [Fact]
-    public async Task AddItem_InvalidTodoListId_ShouldReturnBadRequest()
+    public async Task CreateItem_InvalidTodoListId_ShouldReturnBadRequest()
     {
         // Arrange
         var todoListId = Guid.NewGuid();
@@ -183,18 +183,18 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public async Task AddItem_InvalidModel_TitleEmpty_ShouldReturnBadRequest(string? title)
+    public async Task CreateItem_InvalidModel_TitleEmpty_ShouldReturnBadRequest(string? title)
     {
         // Arrange
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
 
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
 
         context.TodoLists.Add(todoList);
 
@@ -225,60 +225,18 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public async Task AddItem_InvalidModel_DescriptionEmpty_ShouldReturnBadRequest(string? description)
+    public async Task CreateItem_InvalidModel_CategoryEmpty_ShouldReturnBadRequest(string? category)
     {
         // Arrange
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
-        var category = new Category(Guid.NewGuid().ToString());
-
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
-
-        context.TodoLists.Add(todoList);
-
-        await context.SaveChangesAsync();
-
-        var payload = new
-        {
-            Title = Guid.NewGuid().ToString(),
-            Description = description,
-            Category = category.Name
-        };
-
-        var requestUri = $"api/v1/todo-list/{todoList.Id}/item";
-
-        // Act
-        var response = await _client.PostAsJsonAsync(requestUri, payload);
-        var result = await response.Content.ToAppResult<int>();
-
-        // Assert
-        Assert.NotNull(response);
-        Assert.NotNull(result);
-        Assert.False(result.IsSuccess);
-        Assert.NotEmpty(result.Message!);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public async Task AddItem_InvalidModel_CategoryEmpty_ShouldReturnBadRequest(string? category)
-    {
-        // Arrange
-        using var scope = factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
-
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var newCategory = new Category(Guid.NewGuid().ToString());
 
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), newCategory);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), newCategory);
-        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), newCategory);
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), newCategory, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), newCategory, Guid.NewGuid().ToString());
+        todoList.AddItem(new Random().Next(), Guid.NewGuid().ToString(), newCategory, Guid.NewGuid().ToString());
 
         context.TodoLists.Add(todoList);
 
@@ -287,8 +245,8 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         var payload = new
         {
             Title = Guid.NewGuid().ToString(),
-            Description = Guid.NewGuid().ToString(),
-            Category = category
+            Category = category,
+            Description = Guid.NewGuid().ToString()
         };
 
         var requestUri = $"api/v1/todo-list/{todoList.Id}/item";
@@ -305,7 +263,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    #endregion AddItem
+    #endregion CreateItem
 
     #region UpdateItem
 
@@ -316,11 +274,11 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
         var itemId = new Random().Next();
 
-        todoList.AddItem(itemId, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(itemId, Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
         context.TodoLists.Add(todoList);
         await context.SaveChangesAsync();
 
@@ -329,7 +287,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
             Description = "Nueva Descripción Actualizada"
         };
 
-        var requestUri = $"api/v1/todo-list/{todoList.Id}/item/{itemId}";
+        var requestUri = $"api/v1/todo-list/{todoList.Id}/item/{itemId}/description";
 
         // Act
         var response = await _client.PutAsJsonAsync(requestUri, payload);
@@ -355,11 +313,11 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
         var itemId = new Random().Next();
 
-        todoList.AddItem(itemId, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(itemId, Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
         context.TodoLists.Add(todoList);
         await context.SaveChangesAsync();
 
@@ -368,7 +326,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
             Description = "Nueva Descripción Actualizada"
         };
 
-        var requestUri = $"api/v1/todo-list/{Guid.NewGuid()}/item/{itemId}";
+        var requestUri = $"api/v1/todo-list/{Guid.NewGuid()}/item/{itemId}/description";
 
         // Act
         var response = await _client.PutAsJsonAsync(requestUri, payload);
@@ -388,10 +346,10 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         // Arrange
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
         var itemId = new Random().Next();
-        todoList.AddItem(itemId, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(itemId, Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
         context.TodoLists.Add(todoList);
         await context.SaveChangesAsync();
 
@@ -399,7 +357,7 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         {
             Description = description
         };
-        var requestUri = $"api/v1/todo-list/{todoList.Id}/item/{itemId}";
+        var requestUri = $"api/v1/todo-list/{todoList.Id}/item/{itemId}/description";
 
         // Act
         var response = await _client.PutAsJsonAsync(requestUri, payload);
@@ -421,11 +379,11 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
         var itemId = new Random().Next();
 
-        todoList.AddItem(itemId, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(itemId, Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
         context.TodoLists.Add(todoList);
         await context.SaveChangesAsync();
 
@@ -457,11 +415,11 @@ public class TodoListControllerE2ETests(CustomWebApplicationFactory factory) : I
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TodoListDbContext>();
 
-        var todoList = new TodoList();
+        var todoList = new TodoList(Guid.NewGuid().ToString());
         var category = new Category(Guid.NewGuid().ToString());
         var itemId = new Random().Next();
 
-        todoList.AddItem(itemId, Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), category);
+        todoList.AddItem(itemId, Guid.NewGuid().ToString(), category, Guid.NewGuid().ToString());
         context.TodoLists.Add(todoList);
         await context.SaveChangesAsync();
 

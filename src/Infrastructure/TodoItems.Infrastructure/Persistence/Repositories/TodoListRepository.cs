@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TodoItems.Domain.Aggregates.TodoListAggregate;
-using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
+using TodoItems.Domain.Aggregates.TodoListAggregate.Entities;
 
 namespace TodoItems.Infrastructure.Persistence.Repositories;
 
@@ -37,6 +38,11 @@ public class TodoListRepository(TodoListDbContext context) : ITodoListRepository
             .Include(i => i.Progressions)
         .OrderBy(i => i.Id)
         .ToListAsync(cancellationToken);
+
+    public Task<bool> ExistsAsync(Expression<Func<TodoList, bool>> predicate, CancellationToken cancellationToken)
+    {
+        return _context.TodoLists.AnyAsync(predicate, cancellationToken);
+    }
 
     public async Task SaveAsync(TodoList todoList, CancellationToken cancellationToken)
     {

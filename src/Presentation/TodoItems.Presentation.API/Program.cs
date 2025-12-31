@@ -1,20 +1,16 @@
 using TodoItems.Application;
-using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
 using TodoItems.Infrastructure;
 using TodoItems.Domain;
+using TodoItems.Presentation.API._Common.Middlewares;
+using TodoItems.Presentation.API._Common.Extensions;
+using TodoItems.Domain.Aggregates.TodoListAggregate;
 using TodoItems.Presentation.API;
-using TodoItems.Presentation.API.Extensions;
-using TodoItems.Presentation.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Logging.AddFilter("LuckyPennySoftware.MediatR.License", LogLevel.None);
 
 builder.Services.LoadPresentation();
 
 builder.Services.LoadApplication();
-
-builder.Services.LoadDomain();
 
 builder.Services.LoadPersistence();
 

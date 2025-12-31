@@ -1,0 +1,3 @@
+﻿namespace TodoItems.Application.UseCases.TodoListUseCases.UpdateTodoList;
+
+public record UpdateTodoListDescriptionRequest(string Description);

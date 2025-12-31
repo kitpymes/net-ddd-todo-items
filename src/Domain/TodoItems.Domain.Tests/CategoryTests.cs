@@ -2,7 +2,7 @@
 using TodoItems.Domain._Common.Exceptions;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 
-namespace TodoItems.Domain.Tests.ValuesObjects;
+namespace TodoItems.Domain.Tests;
 
 public class CategoryTests
 {

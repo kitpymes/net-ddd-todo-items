@@ -1,38 +1,66 @@
 ﻿using MediatR;
+using TodoItems.Domain._Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using TodoItems.Domain._Common;
-using TodoItems.Domain._Common.Events;
 using TodoItems.Domain._Common.Exceptions;
-using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
+using TodoItems.Domain.Aggregates.TodoListAggregate.Entities;
 using TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
+using TodoItems.Domain.Aggregates.TodoListAggregate.Events;
 
 namespace TodoItems.Domain.Aggregates.TodoListAggregate;
 
-public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
+public class TodoList : AggregateRoot, ITodoList
 {
-    public TodoList() { }
     private readonly ILogger<TodoList> _logger = NullLogger<TodoList>.Instance;
-
-    #region DomainEvents
-
-    private readonly List<INotification> _domainEvents = [];
-    public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
-    public void AddDomainEvent(INotification domainEvent) => _domainEvents.Add(domainEvent);
-    public void RemoveDomainEvent(INotification domainEvent) => _domainEvents.Remove(domainEvent);
-    public void ClearDomainEvents() => _domainEvents.Clear();
-
-    #endregion DomainEvents
 
     private List<TodoItem> _items = [];
     public virtual IReadOnlyCollection<TodoItem> Items => _items.AsReadOnly();
 
-    public void AddItem(int id, string title, string description, Category category)
+    public string Title { get; private set; } = string.Empty;
+
+    public string? Description { get; private set; }
+
+    private TodoList() { }
+
+    public TodoList(string title, string? description = null)
+    {
+        UpdateTitle(title);
+
+        Description = description;
+    }
+
+    public void UpdateTitle(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new DomainValidationException("El título es obligatorio.");
+
+        if (title == Title)
+            return;
+
+        Title = title;
+
+        _logger.LogInformation($"Título de la lista actualizado a '{Title}'.");
+    }
+
+    public void UpdateDescription(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+            throw new DomainValidationException("La descripción es obligatoria.");
+
+        if (description == Description)
+            return;
+
+        Description = description;
+
+        _logger.LogInformation("Descripción de la lista actualizada.");
+    }
+
+    public void AddItem(int id, string title, Category category, string? description = null)
     {
         if (_items.Exists(x => x.Id == id))
             throw new DomainValidationException($"El ítem con ID {id} ya existe en la lista.");
 
-        var newItem = new TodoItem(id, title, description, category);
+        var newItem = new TodoItem(id, title, category, description);
 
         _items.Add(newItem);
 
@@ -41,7 +69,23 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
         _logger.LogInformation($"Ítem '{title}' añadido exitosamente.");
     }
 
-    public void UpdateItem(int id, string description)
+    public void UpdateItemTitle(int id, string title)
+    {
+        var item = _items.FirstOrDefault(x => x.Id == id);
+
+        if (item is null)
+            throw new DomainValidationException($"No se puede actualizar porque no se encontró el ítem con ID {id}.");
+
+        //REQUERIDO: No se permitirá actualizar ni borrar un TodoItem que tenga más del 50% realizado.
+        if (item.TotalProgress > 50)
+            throw new DomainValidationException("No se puede actualizar el ítem porque tiene más del 50% realizado.");
+
+        item.UpdateTitle(title);
+
+        _logger.LogInformation($"Título del ítem {id} actualizado.");
+    }
+
+    public void UpdateItemDescription(int id, string description)
     {
         var item = _items.FirstOrDefault(x => x.Id == id);
 
@@ -54,7 +98,7 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
 
         item.UpdateDescription(description);
 
-        _logger.LogInformation($"Descripción del ítem {id} actualizada.");
+        _logger.LogInformation($"Descripción del ítem {id} actualizado.");
     }
 
     public void RemoveItem(int itemId)
@@ -74,7 +118,7 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
         _logger.LogInformation($"Ítem {itemId} eliminado.");
     }
 
-    public void RegisterProgression(int itemId, DateTime dateTime, decimal percent)
+    public void RegisterItemProgression(int itemId, DateTime dateTime, decimal percent)
     {
         var item = _items.FirstOrDefault(x => x.Id == itemId);
 
@@ -99,17 +143,9 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
         _logger.LogInformation($"Progreso de {percent}% registrado para el ítem {itemId}.");
     }
 
-
-    /*  REQUERIDO: 
-     
-        Cuando se ejecute el PrintItems, se mostrarán todos los TodoItems que tenga el agregado ordenado por el Id. 
-        La cabecera de cada TodoItem tendrá el siguiente formato: {Id}) {Title} - {Description} ({Category}) Completed:{IsCompleted}.
-
-        Ej: 1) Complete Project Report - Finish the final report for the project (Work) Completed:True
-    */
     public void PrintItems()
     {
-        Console.WriteLine("\n--- LISTADO DE TAREAS ---");
+        Console.WriteLine($"\n --- Tareas del {Title}:  {Description}");
 
         foreach (var item in _items.OrderBy(x => x.Id))
         {
@@ -117,17 +153,6 @@ public class TodoList : EntityBaseGuid, ITodoList, IAggregateRoot
 
             Console.WriteLine(item.ToFullString());
 
-            /*  REQUERIDO: 
-             
-                Para cada elemento dentro de la lista de Progression, se mostrará la fecha, el porcentaje acumulado hasta ese
-                elemento y una barra de progreso que hará más visible el progreso realizado.
-             
-
-                Ej: 1) Complete Project Report - Finish the final report for the project (Work) Completed:True
-                    3/18/2025 12:00:00 AM -  30% |OOOOOOOOOOOOOOO |
-                    3/19/2025 12:00:00 AM -  80% |OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO |
-                    3/20/2025 12:00:00 AM - 100% |OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO|
-             */
             if (item.Progressions.Count > 0)
             {
                 var percentSum = 0m;

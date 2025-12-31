@@ -1,0 +1,29 @@
+﻿using MediatR;
+using TodoItems.Application._Common.Exceptions;
+using TodoItems.Domain._Common.AppResults;
+using TodoItems.Domain.Aggregates.TodoListAggregate;
+
+namespace TodoItems.Application.UseCases.TodoListUseCases.RegisterProgressTodoItem;
+
+public record RegisterProgressTodoItemCommand(Guid TodoListId, int ItemId, decimal Percent, DateTime? Date = null) : IRequest<IAppResult>;
+
+public class RegisterProgressTodoItemCommandHandler(ITodoListRepository repository) : IRequestHandler<RegisterProgressTodoItemCommand, IAppResult>
+{
+    private readonly ITodoListRepository _repository = repository;
+
+    public async Task<IAppResult> Handle(RegisterProgressTodoItemCommand request, CancellationToken cancellationToken)
+    {
+        var todoList = await _repository.GetTodoListByIdAsync(request.TodoListId, cancellationToken);
+
+        if (todoList is null)
+            throw new AppValidationsException($"La lista de tareas con Id {request.TodoListId} no fue encontrada.");
+
+        var registrationDate = request.Date ?? DateTime.UtcNow;
+
+        todoList.RegisterItemProgression(request.ItemId, registrationDate, request.Percent);
+
+        await _repository.SaveAsync(todoList, cancellationToken);
+
+        return AppResult.Success();
+    }
+}

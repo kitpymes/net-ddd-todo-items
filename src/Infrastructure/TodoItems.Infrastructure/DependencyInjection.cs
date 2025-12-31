@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using TodoItems.Domain.Aggregates.TodoListAggregate.Interfaces;
+using TodoItems.Domain.Aggregates.TodoListAggregate;
 using TodoItems.Infrastructure.Persistence;
 using TodoItems.Infrastructure.Persistence.Repositories;
 

@@ -12,19 +12,14 @@ public sealed class TodoListEntityConfiguration : IEntityTypeConfiguration<TodoL
 
         builder.HasKey(x => x.Id);
 
-      
+        builder.Property(t => t.Title).IsRequired();
 
         builder.Metadata.FindNavigation(nameof(TodoList.Items))?.SetPropertyAccessMode(PropertyAccessMode.Field);
-
-        //builder.Navigation(x => x.Items)
-        //    .HasField("_items")
-        //    .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasMany(x => x.Items)
                .WithOne()
                .HasForeignKey("TodoListId")
                .OnDelete(DeleteBehavior.Cascade);
-
     }
 }
 

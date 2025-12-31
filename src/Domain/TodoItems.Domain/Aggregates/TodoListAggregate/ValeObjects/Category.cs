@@ -1,7 +1,4 @@
-﻿
-using System.Globalization;
-using TodoItems.Domain._Common.Exceptions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using TodoItems.Domain._Common.Exceptions;
 
 namespace TodoItems.Domain.Aggregates.TodoListAggregate.ValeObjects;
 

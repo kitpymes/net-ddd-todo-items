@@ -10,15 +10,13 @@ public static class TodoListDataSeeder
     {
         if (context.TodoLists.Any()) return;
 
-        var projectReport = new TodoList();
+        var projectReport = new TodoList("Proyecto Test", "Proyecto creado con Seed Data utilizando First Code");
 
-        var workCat = new Category("Work");
-        var managementCat = new Category("Management");
-        var researchCat = new Category("Research");
+        var cat1 = new Category("Normal");
+        var cat2 = new Category("Urgente");
 
-        projectReport.AddItem(101, "Configuración de Arquitectura", "Configurar el esqueleto de DDD y EF Core", workCat);
-        projectReport.AddItem(102, "Reunión de Stakeholders", "Presentación de avances del primer sprint", managementCat);
-        projectReport.AddItem(103, "Investigación de UI/UX", "Analizar tendencias de diseño para 2026", researchCat);
+        projectReport.AddItem(101, "Configuración de Arquitectura", cat1, "Configurar el esqueleto de DDD y EF Core");
+        projectReport.AddItem(102, "Reunión de Stakeholders", cat2, "Presentación de avances del primer sprint");
 
         context.TodoLists.Add(projectReport);
 
@@ -29,9 +27,9 @@ public static class TodoListDataSeeder
                 .ThenInclude(i => i.Progressions)
             .FirstOrDefault();
 
-        todoList.RegisterProgression(101, DateTime.UtcNow.AddHours(1), 30);
-        todoList.RegisterProgression(101, DateTime.UtcNow.AddHours(2), 50);
-        todoList.RegisterProgression(101, DateTime.UtcNow.AddHours(3), 20);
+        todoList.RegisterItemProgression(101, DateTime.UtcNow.AddHours(1), 30);
+        todoList.RegisterItemProgression(101, DateTime.UtcNow.AddHours(2), 50);
+        todoList.RegisterItemProgression(101, DateTime.UtcNow.AddHours(3), 20);
 
         context.TodoLists.Update(todoList);
 
